@@ -2,7 +2,8 @@
  * aria_fleet.c - ARIA in the DREAM Robotics fleet, on top of ESP-Drone.
  *
  * She joins the highest fleet network she can see, registers with whoever hosts its list (RIFT's
- * :5000), answers /status and /chirp on :5014, and sends the fleet's ESP-NOW "I'm here" beacon.
+ * :5000), serves her controller page, /status and /chirp on :5014, and sends the fleet's ESP-NOW
+ * "I'm here" beacon.
  *
  * The fleet can look at her and hear her. It can't fly her: nothing here touches a motor, a setpoint
  * or the commander, and RIFT lists no action that moves her. Flight comes first:
@@ -177,7 +178,32 @@ static void chirpTask(void *arg)
     }
 }
 
-// ---- :5014 ----
+// ---- :5014: her controller page (web/, built into the firmware) ----
+extern const char index_html_start[] asm("_binary_index_html_start");
+extern const char style_css_start[] asm("_binary_style_css_start");
+extern const char app_js_start[] asm("_binary_app_js_start");
+
+static esp_err_t sendFile(httpd_req_t *req, const char *type, const char *text)
+{
+    httpd_resp_set_type(req, type);
+    return httpd_resp_sendstr(req, text);
+}
+
+static esp_err_t pageGet(httpd_req_t *req)
+{
+    return sendFile(req, "text/html", index_html_start);
+}
+
+static esp_err_t styleGet(httpd_req_t *req)
+{
+    return sendFile(req, "text/css", style_css_start);
+}
+
+static esp_err_t scriptGet(httpd_req_t *req)
+{
+    return sendFile(req, "text/javascript", app_js_start);
+}
+
 static esp_err_t sendJson(httpd_req_t *req, const char *json)
 {
     httpd_resp_set_type(req, "application/json");
@@ -235,6 +261,9 @@ void ariaFleetStart(esp_netif_t *sta)
     httpd_handle_t server = NULL;
     if (httpd_start(&server, &cfg) == ESP_OK) {
         const httpd_uri_t routes[] = {
+            {.uri = "/", .method = HTTP_GET, .handler = pageGet},
+            {.uri = "/style.css", .method = HTTP_GET, .handler = styleGet},
+            {.uri = "/app.js", .method = HTTP_GET, .handler = scriptGet},
             {.uri = "/status", .method = HTTP_GET, .handler = statusGet},
             {.uri = "/ping", .method = HTTP_GET, .handler = pingGet},
             {.uri = "/chirp", .method = HTTP_GET, .handler = chirpGet},

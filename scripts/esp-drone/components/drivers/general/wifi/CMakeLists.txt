@@ -6,4 +6,5 @@ endif()
 
 idf_component_register(SRCS ${wifi_sources}
                       INCLUDE_DIRS "." "include"
+                      EMBED_TXTFILES "web/index.html" "web/style.css" "web/app.js"
                       REQUIRES crazyflie platform config esp_wifi esp_event esp_netif lwip nvs_flash esp_http_server esp_http_client led motors)

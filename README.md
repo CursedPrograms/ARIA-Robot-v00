@@ -26,11 +26,13 @@
 `CONFIG_ARIA_FLEET`, on by default (`components/drivers/general/wifi/aria_fleet.c`):
 
 - **RIFT:** she keeps her own AP for the app and joins the highest fleet network she can see, then registers with whoever hosts the list. She only ever joins, she never hosts.
-- **`:5014`:** `GET /status` (flying, battery, network, signal), `GET /ping`, `GET /chirp?u=<0-16>`.
+- **`:5014`:** her controller page (`web/`, RIFT's Open button), `GET /status` (flying, battery, network, signal), `GET /ping`, `GET /chirp?u=<0-16>`.
 - **ESP-NOW:** the fleet's "I'm here" beacon twice a second, saying "park" or "go". She sends it and doesn't listen, like MILA and NIKA.
 - **Brainfuck:** the fleet's phrases, a tone per symbol on the buzzer deck and a flash of her blue LED, so she talks with or without the buzzer.
 - **Safety:** the fleet can look at her and hear her, nothing in it can arm or fly her. It runs at the lowest priority, and with her motors spinning she won't scan, join a network or chirp, because a scan would cut the app flying her.
 - **Her WiFi channel is 1**, the fleet's (ESP-Drone's default was 6).
+
+`python scripts/fake_aria.py` is a pretend ARIA on this PC, for trying the page and RIFT's link with no drone.
 
 Not done: the ladder's climbing while she's on a lower network (she looks again only when she has no network), and following a host's change mid-flight.
 - Site: https://cursedprograms.github.io/ARIA-Robot-v00/
