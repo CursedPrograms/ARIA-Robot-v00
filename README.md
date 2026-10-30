@@ -19,7 +19,7 @@
 - Robot Type: Drone
 - Hardware: Diymore ESP32 Drone DIY Kit E1, on order: the CHERGLOW (琛光) E1 Mini, MPU6500 gyro over SPI. Sold as an ESP32-S3 with 716 motors, but her manual and the open design say a plain 30-pin ESP32 with 8520 motors, so the chip gets confirmed when she arrives. 3.7 V single-cell LiPo, not included.
 - Based on: [CF-Drone](https://github.com/songge8/CF-Drone) e7f507f (CHERGLOW / songge8, built on [Flix](https://github.com/okalachev/flix) and ESP-Drone), her kit's own flight firmware. Her S3 pins come from [RayCyder/CF-Drone](https://github.com/RayCyder/CF-Drone), her hardware design is at [oshwhub](https://oshwhub.com/songge8/project_qqqyfdkm).
-- Firmware: `scripts/aria_flight` (Arduino, English throughout), for a plain ESP32 or an S3. `scripts/esp-drone` is the earlier attempt, kept for reference and no longer used.
+- Firmware: `scripts/aria_flight` (Arduino, English throughout), for a plain ESP32 or an S3.
 - Licence: GPL-3.0 with CF-Drone's additional terms (`scripts/aria_flight/LICENSE`). Personal and non-commercial use is exempt from those terms; selling her firmware or hardware isn't allowed without CHERGLOW's permission.
 - Colours: cyan and white, like clouds
 - Status: her firmware compiles for both chips and her link rules pass their tests on a PC. It has never run on her: she hasn't arrived, and nothing here is flight-tested.

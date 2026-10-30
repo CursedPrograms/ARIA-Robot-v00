@@ -1,6 +1,6 @@
 """fake_aria.py - a pretend ARIA on this PC, for trying her page and RIFT's link with no drone.
 
-Answers what aria_fleet.c answers on :5014 and serves the same web files:
+Answers what aria_fleet.cpp answers on :5014 and serves the same web files:
     python scripts/fake_aria.py [--register http://127.0.0.1:5000] [--flying]
 """
 import argparse
@@ -17,7 +17,7 @@ import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 PORT = 5014
-WEB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "esp-drone", "components", "drivers", "general", "wifi", "web")
+WEB = os.path.join(os.path.dirname(os.path.abspath(__file__)), "aria_flight", "web")
 TYPES = {"/": ("index.html", "text/html"), "/style.css": ("style.css", "text/css"), "/app.js": ("app.js", "text/javascript"),
          "/fly": ("fly.html", "text/html"), "/fly.css": ("fly.css", "text/css"), "/fly.js": ("fly.js", "text/javascript")}
 state = {"flying": False}
