@@ -31,6 +31,15 @@ class AriaProtocolTest {
         assertEquals((sum and 0xFF).toByte(), p[15])
     }
 
+    @Test fun bluetoothFrameIsTheBrowsersFrame() {
+        val b = ByteBuffer.wrap(AriaProtocol.frame(1.5f, 2f, -3f, 40000)).order(ByteOrder.LITTLE_ENDIAN)
+        assertEquals(14, b.capacity())
+        assertEquals(1.5f, b.getFloat(0), 0f)
+        assertEquals(-2f, b.getFloat(4), 0f)
+        assertEquals(-3f, b.getFloat(8), 0f)
+        assertEquals(40000, b.getShort(12).toInt() and 0xFFFF)
+    }
+
     @Test fun thrustIsClamped() {
         val p = AriaProtocol.setpoint(0f, 0f, 0f, 99999)
         assertEquals(60000, ByteBuffer.wrap(p).order(ByteOrder.LITTLE_ENDIAN).getShort(13).toInt() and 0xFFFF)
@@ -79,6 +88,12 @@ class AriaProtocolTest {
         assertEquals(Flight.MAX_TILT_DEG, c.roll, 0f)
         assertEquals(-Flight.MAX_TILT_DEG, c.pitch, 0f)
         assertEquals(Flight.MAX_YAW_DEG_S, c.yawRate, 0f)
+    }
+
+    @Test fun nearbyRobotsGetARoughDistance() {
+        assertEquals(listOf("WHIP" to "~1.0 m", "NORA" to "~10 m"),
+                     Tiles.near("""{"robots":[{"name":"WHIP","rssi":-50},{"name":"NORA","rssi":-75}]}"""))
+        assertTrue(Tiles.near(null).isEmpty())
     }
 
     @Test fun limitStaysInItsRange() {

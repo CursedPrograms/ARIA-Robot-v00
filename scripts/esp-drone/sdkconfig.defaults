@@ -38,3 +38,5 @@ CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS=y
 
 # ARIA: the browser's flight link
 CONFIG_HTTPD_WS_SUPPORT=y
+# ARIA: she hears the fleet's ESP-NOW beacons, so the ESP-BOX joystick receiver stays off
+# CONFIG_ESPNOW_CONTROL is not set

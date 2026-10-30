@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 #define ARIA_PORT 5014
@@ -68,6 +69,67 @@ static inline void ariaFlyPacket(const uint8_t *in, uint8_t *out)
     out[0] = 0x30;              // CRTP port 3, channel 0
     memcpy(out + 1, v, sizeof(v));
     memcpy(out + 1 + sizeof(v), &thrust, sizeof(thrust));
+}
+
+// Who she can hear, from the fleet's beacons, smoothed as fleet_near.h does
+#define ARIA_PEERS_MAX 12
+#define ARIA_PEER_FORGET_MS 5000
+
+typedef struct {
+    char name[12];
+    float rssi;
+    uint32_t seenMs;
+} AriaPeer;
+
+static inline void ariaPeerHeard(AriaPeer *peers, const uint8_t *data, int len, int rssi, uint32_t nowMs)
+{
+    if (len < (int)offsetof(AriaBeacon, bf) || memcmp(data, "DRFL", 4) != 0 || data[4] != 1) {
+        return;
+    }
+    char name[12];
+    memcpy(name, data + 5, 11);
+    name[11] = 0;
+    if (!name[0] || strcmp(name, "ARIA") == 0) {
+        return;
+    }
+    AriaPeer *free_ = NULL;
+    for (int i = 0; i < ARIA_PEERS_MAX; i++) {
+        if (peers[i].name[0] && strcmp(peers[i].name, name) == 0) {
+            peers[i].rssi += (rssi - peers[i].rssi) * 0.3f;
+            peers[i].seenMs = nowMs;
+            return;
+        }
+        if (!peers[i].name[0] && !free_) {
+            free_ = &peers[i];
+        }
+    }
+    if (free_) {
+        memcpy(free_->name, name, 12);
+        free_->rssi = rssi;
+        free_->seenMs = nowMs;
+    }
+}
+
+// {"robots":[{"name":"WHIP","rssi":-52},...]}, as every robot's /near; forgets the silent ones
+static inline void ariaNearJson(AriaPeer *peers, uint32_t nowMs, char *out, size_t size)
+{
+    size_t used = (size_t)snprintf(out, size, "{\"robots\":[");
+    bool first = true;
+    for (int i = 0; i < ARIA_PEERS_MAX; i++) {
+        if (!peers[i].name[0]) {
+            continue;
+        }
+        if (nowMs - peers[i].seenMs > ARIA_PEER_FORGET_MS) {
+            peers[i].name[0] = 0;
+            continue;
+        }
+        if (used + 40 < size) {
+            used += (size_t)snprintf(out + used, size - used, "%s{\"name\":\"%s\",\"rssi\":%d}", first ? "" : ",",
+                                     peers[i].name, (int)peers[i].rssi);
+            first = false;
+        }
+    }
+    snprintf(out + used, size - used, "]}");
 }
 
 // The ladder, highest first (RIFT/Fleet/fleet_ladder.py). She joins, she never hosts.

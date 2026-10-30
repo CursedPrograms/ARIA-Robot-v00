@@ -66,8 +66,10 @@ class Handler(BaseHTTPRequestHandler):
         if url.path == "/status":
             f = state["flying"]
             return self.reply(200, json.dumps({"name": "ARIA", "type": "drone", "mode": "flying" if f else "ground", "moving": f,
-                                               "flying": f, "battery_v": round(3.9 + random.random() / 20, 2),
+                                               "flying": f, "battery_v": round(3.9 + random.random() / 20, 2), "pitch": 0.4, "roll": -0.8,
                                                "network": "RIFT", "rssi": -52}))
+        if url.path == "/near":
+            return self.reply(200, json.dumps({"robots": [{"name": "WHIP", "rssi": -48}, {"name": "NORA", "rssi": -63}, {"name": "MILA", "rssi": -74}]}))
         if url.path == "/ping":
             return self.reply(200, "ARIA", "text/plain")
         if url.path == "/chirp":

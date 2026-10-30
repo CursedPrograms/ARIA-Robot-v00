@@ -18,7 +18,8 @@ import kotlin.concurrent.thread
  * no internet, so Android would rather use mobile data: the app ties itself to WiFi first.
  * Stop sending and her firmware levels off at 0.5 s and cuts the motors at 2 s.
  */
-class AriaLink(private val context: Context, private val onStatus: (JSONObject?) -> Unit) {
+class AriaLink(private val context: Context, private val bluetooth: AriaBluetooth, private val onStatus: (JSONObject?, JSONObject?) -> Unit) {
+    @Volatile var useBluetooth = false
     @Volatile private var running = false
     @Volatile var command = Command(0f, 0f, 0f, 0)
     @Volatile var tick: (Float) -> Command = { command }
@@ -58,6 +59,11 @@ class AriaLink(private val context: Context, private val onStatus: (JSONObject?)
                 last = now
                 command = c
                 val bytes = AriaProtocol.setpoint(c.roll, c.pitch, c.yawRate, c.thrust)
+                if (useBluetooth) {
+                    bluetooth.send(AriaProtocol.frame(c.roll, c.pitch, c.yawRate, c.thrust))
+                    Thread.sleep(33)
+                    continue
+                }
                 try {
                     socket.send(DatagramPacket(bytes, bytes.size, InetAddress.getByName(AriaProtocol.HOST), AriaProtocol.UDP_PORT))
                 } catch (_: java.io.IOException) {
@@ -72,13 +78,13 @@ class AriaLink(private val context: Context, private val onStatus: (JSONObject?)
 
     private fun statusLoop() {
         while (running) {
-            onStatus(fetchStatus())
+            if (useBluetooth) bluetooth.readState() else onStatus(fetchStatus("/status"), fetchStatus("/near"))
             Thread.sleep(1000)
         }
     }
 
-    private fun fetchStatus(): JSONObject? = try {
-        val http = URL("http://${AriaProtocol.HOST}:${AriaProtocol.PAGE_PORT}/status").openConnection() as HttpURLConnection
+    private fun fetchStatus(path: String): JSONObject? = try {
+        val http = URL("http://${AriaProtocol.HOST}:${AriaProtocol.PAGE_PORT}$path").openConnection() as HttpURLConnection
         http.connectTimeout = 700
         http.readTimeout = 700
         try {

@@ -8,3 +8,6 @@ void ariaFleetStart(esp_netif_t *sta);
 
 // wifi_esp32.c: a CRTP packet into the same queue as one from the app's UDP
 bool wifiInjectPacket(const uint8_t *data, uint8_t size);
+
+// aria_ble.c: flying over Bluetooth, on the ESP32-S3
+void ariaBleStart(void);

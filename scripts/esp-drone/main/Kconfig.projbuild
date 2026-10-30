@@ -112,6 +112,13 @@ menu "ESPDrone Config"
                 Joins the fleet's WiFi, registers with RIFT, answers /status and /chirp on :5014 and
                 sends the fleet's ESP-NOW beacon. Never moves her.
 
+        config ARIA_BLE
+            bool "ARIA: fly her over Bluetooth, paired with her app"
+            depends on ARIA_FLEET && BT_NIMBLE_ENABLED
+            default y
+            help
+                ESP32-S3 only: the S2 has no Bluetooth. New phones can pair in her first two minutes.
+
         config ARIA_FLEET_PASSWORD
             string "The fleet's WiFi password"
             depends on ARIA_FLEET

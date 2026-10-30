@@ -25,6 +25,16 @@ object AriaProtocol {
         b.put(sum.toByte())
         return b.array()
     }
+
+    /** The browser's and Bluetooth's frame: no CRTP header or checksum, her firmware adds those. */
+    fun frame(roll: Float, pitch: Float, yawRate: Float, thrust: Int): ByteArray {
+        val b = ByteBuffer.allocate(14).order(ByteOrder.LITTLE_ENDIAN)
+        b.putFloat(roll)
+        b.putFloat(-pitch)
+        b.putFloat(yawRate)
+        b.putShort(thrust.coerceIn(0, FULL_THRUST).toShort())
+        return b.array()
+    }
 }
 
 /** The sticks right now. throttle is null while no finger is on it. Everything else -1..1. */

@@ -38,6 +38,7 @@
 #include "led.h"
 #include "motors.h"
 #include "pm_esplane.h"
+#include "sensfusion6.h"
 #define DEBUG_MODULE "FLEET"
 #include "debug_cf.h"
 
@@ -124,8 +125,15 @@ static void registerWithFleet(void)
     esp_http_client_cleanup(http);
 }
 
-// ---- ESP-NOW: the fleet's beacon. She sends it and doesn't listen (as MILA and NIKA do): the
-// others hear her, and ESP-Drone's own ESP-NOW control keeps the receive side ----
+// ---- ESP-NOW: the fleet's beacon, sent and heard. Hearing means ESP-Drone's own ESP-NOW control
+// (the ESP-BOX joystick) stays off: it wants the same receive callback ----
+static AriaPeer peers[ARIA_PEERS_MAX];
+
+static void beaconHeard(const esp_now_recv_info_t *info, const uint8_t *data, int len)
+{
+    ariaPeerHeard(peers, data, len, info->rx_ctrl->rssi, (uint32_t)pdTICKS_TO_MS(xTaskGetTickCount()));
+}
+
 static void sendBeacon(void)
 {
     static uint16_t seq = 0;
@@ -140,6 +148,7 @@ static void fleetTask(void *arg)
     esp_now_peer_info_t peer = {.channel = 0, .ifidx = WIFI_IF_AP, .encrypt = false};
     memcpy(peer.peer_addr, BROADCAST, ESP_NOW_ETH_ALEN);
     esp_now_add_peer(&peer);
+    esp_now_register_recv_cb(beaconHeard);
 
     TickType_t nextRegister = 0, nextLook = 0;
     while (1) {
@@ -263,14 +272,23 @@ static esp_err_t sendJson(httpd_req_t *req, const char *json)
 
 static esp_err_t statusGet(httpd_req_t *req)
 {
-    char json[220];
+    char json[280];
+    float roll = 0, pitch = 0, yaw = 0;
+    sensfusion6GetEulerRPY(&roll, &pitch, &yaw);
     wifi_ap_record_t ap = {0};
     const int rssi = online && esp_wifi_sta_get_ap_info(&ap) == ESP_OK ? ap.rssi : 0;
     snprintf(json, sizeof(json),
              "{\"name\":\"ARIA\",\"type\":\"drone\",\"mode\":\"%s\",\"moving\":%s,\"flying\":%s,"
-             "\"battery_v\":%.2f,\"network\":\"%s\",\"rssi\":%d}",
+             "\"battery_v\":%.2f,\"pitch\":%.1f,\"roll\":%.1f,\"network\":\"%s\",\"rssi\":%d}",
              flying() ? "flying" : "ground", flying() ? "true" : "false", flying() ? "true" : "false",
-             (double)pmGetBatteryVoltage(), joined, rssi);
+             (double)pmGetBatteryVoltage(), (double)pitch, (double)roll, joined, rssi);
+    return sendJson(req, json);
+}
+
+static esp_err_t nearGet(httpd_req_t *req)
+{
+    char json[420];
+    ariaNearJson(peers, (uint32_t)pdTICKS_TO_MS(xTaskGetTickCount()), json, sizeof(json));
     return sendJson(req, json);
 }
 
@@ -321,6 +339,7 @@ void ariaFleetStart(esp_netif_t *sta)
             {.uri = "/fly.js", .method = HTTP_GET, .handler = flyScriptGet},
             {.uri = "/fly-ws", .method = HTTP_GET, .handler = flySocket, .is_websocket = true},
             {.uri = "/status", .method = HTTP_GET, .handler = statusGet},
+            {.uri = "/near", .method = HTTP_GET, .handler = nearGet},
             {.uri = "/ping", .method = HTTP_GET, .handler = pingGet},
             {.uri = "/chirp", .method = HTTP_GET, .handler = chirpGet},
         };
@@ -328,6 +347,9 @@ void ariaFleetStart(esp_netif_t *sta)
             httpd_register_uri_handler(server, &routes[i]);
         }
     }
+#ifdef CONFIG_ARIA_BLE
+    ariaBleStart();
+#endif
     xTaskCreate(fleetTask, "fleet", FLEET_TASK_STACK, NULL, FLEET_TASK_PRI, NULL);
     xTaskCreate(chirpTask, "chirp", CHIRP_TASK_STACK, NULL, FLEET_TASK_PRI, NULL);
 }
