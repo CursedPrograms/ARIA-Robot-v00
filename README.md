@@ -1,3 +1,5 @@
+<p align="center"><img src="images/avatar_round.png" width="160" alt="ARIA"></p>
+
 [![Twitter: @NorowaretaGemu](https://img.shields.io/badge/X-@NorowaretaGemu-blue.svg?style=flat)](https://x.com/NorowaretaGemu)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
@@ -29,6 +31,8 @@
 - **`:5014`:** her controller page (`web/`, RIFT's Open button), `GET /status` (flying, battery, network, signal), `GET /ping`, `GET /chirp?u=<0-16>`.
 - **ESP-NOW:** the fleet's "I'm here" beacon twice a second, saying "park" or "go". She sends it and doesn't listen, like MILA and NIKA.
 - **Brainfuck:** the fleet's phrases, a tone per symbol on the buzzer deck and a flash of her blue LED, so she talks with or without the buzzer.
+- **Flying from a browser:** on her own WiFi, `http://192.168.43.42:5014/fly` has two sticks over a WebSocket (`/fly-ws`). Her firmware refuses anyone on the fleet's network, caps tilt, yaw and thrust again, and her thrust lock and watchdog still hold.
+- **Flying from her Android app:** `Android App/`, the same sticks and rules over UDP. Build it with `gradlew assembleDebug`; the APKs are kept in `Android App/apk/`.
 - **Safety:** the fleet can look at her and hear her, nothing in it can arm or fly her. It runs at the lowest priority, and with her motors spinning she won't scan, join a network or chirp, because a scan would cut the app flying her.
 - **Her WiFi channel is 1**, the fleet's (ESP-Drone's default was 6).
 
@@ -36,6 +40,10 @@
 
 Not done: the ladder's climbing while she's on a lower network (she looks again only when she has no network), and following a host's change mid-flight.
 - Site: https://cursedprograms.github.io/ARIA-Robot-v00/
+
+<div align="center">
+  <img src="images/aria_avatar.jpg" alt="ARIA avatar: a human representation of the drone" width="320"/>
+</div>
 
 ARIA is the flying member of the DREAM Robotics fleet. The plan is the same as the rest of the fleet: she joins RIFT's network, answers `/status`, and talks to the others. ESP-Drone already gives her Wi-Fi control from an app or gamepad, stabilize mode, and height-hold and position-hold with extension boards.
 

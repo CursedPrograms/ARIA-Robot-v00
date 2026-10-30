@@ -36,6 +36,40 @@ static inline void ariaBeaconFill(AriaBeacon *b, bool moving, uint16_t seq)
     strncpy(b->bf, moving ? ARIA_STATE_GO : ARIA_STATE_PARK, ARIA_BF_MAX - 1);
 }
 
+// Flying from a browser. Only from her own WiFi (192.168.43.x, her AP), never over the fleet's network.
+#define ARIA_FLY_BYTES 14       // roll, pitch, yaw (little-endian floats), thrust (uint16)
+#define ARIA_FLY_PACKET 15
+#define ARIA_MAX_TILT 15.0f
+#define ARIA_MAX_YAW 120.0f
+#define ARIA_MAX_THRUST 48000   // 80% of ESP-Drone's 60000, as the app's top limit
+
+static inline bool ariaOnOwnWifi(uint32_t hostOrderIp)
+{
+    return (hostOrderIp & 0xFFFFFF00u) == 0xC0A82B00u;
+}
+
+static inline float ariaClamp(float v, float top)
+{
+    if (!(v == v)) return 0;    // NaN
+    return v > top ? top : v < -top ? -top : v;
+}
+
+// The same limits as the page, again here: the page is only a suggestion. out: a CRTP setpoint
+static inline void ariaFlyPacket(const uint8_t *in, uint8_t *out)
+{
+    float v[3];
+    uint16_t thrust;
+    memcpy(v, in, sizeof(v));
+    memcpy(&thrust, in + sizeof(v), sizeof(thrust));
+    v[0] = ariaClamp(v[0], ARIA_MAX_TILT);
+    v[1] = ariaClamp(v[1], ARIA_MAX_TILT);
+    v[2] = ariaClamp(v[2], ARIA_MAX_YAW);
+    if (thrust > ARIA_MAX_THRUST) thrust = ARIA_MAX_THRUST;
+    out[0] = 0x30;              // CRTP port 3, channel 0
+    memcpy(out + 1, v, sizeof(v));
+    memcpy(out + 1 + sizeof(v), &thrust, sizeof(thrust));
+}
+
 // The ladder, highest first (RIFT/Fleet/fleet_ladder.py). She joins, she never hosts.
 static const char *const ARIA_LADDER[] = {
     "RIFT", "DREAM", "NINA", "TINA",

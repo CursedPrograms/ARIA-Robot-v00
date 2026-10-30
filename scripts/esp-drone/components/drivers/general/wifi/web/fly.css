@@ -1,0 +1,32 @@
+/* Flying ARIA from a browser: cyan sky, white clouds, two sticks */
+:root {
+  --bg: #E6FAFD;
+  --panel: #FFFFFF;
+  --border: #B5EAF2;
+  --accent: #0891B2;
+  --bright: #22D3EE;
+  --text: #0B3A44;
+  --stop: #B91C1C;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+body {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+header { display: flex; align-items: center; gap: 12px; padding: 6px 12px; background: var(--panel); border-bottom: 1px solid var(--border); }
+.name { color: var(--accent); font-weight: 700; letter-spacing: 4px; text-decoration: none; }
+#state { flex: 1; }
+label { display: flex; align-items: center; gap: 6px; }
+button { padding: 8px 14px; border: 0; border-radius: 8px; color: #FFFFFF; font: inherit; font-weight: 700; touch-action: none; }
+#arm { background: var(--accent); }
+#arm.armed { background: var(--bright); color: var(--text); }
+#stop { background: var(--stop); padding: 8px 22px; }
+main { flex: 1; display: flex; justify-content: space-around; align-items: center; padding: 10px; min-height: 0; }
+.stick { position: relative; height: 100%; aspect-ratio: 1; max-width: 46%; background: var(--panel); border: 2px solid var(--border); border-radius: 18px; touch-action: none; }
+.stick span { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font-size: 12px; pointer-events: none; }
+.knob { position: absolute; left: 50%; top: 50%; width: 22%; height: 22%; margin: -11% 0 0 -11%; border-radius: 50%; background: var(--border); pointer-events: none; }
+.stick.held .knob { background: var(--bright); }

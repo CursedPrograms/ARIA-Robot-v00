@@ -5,8 +5,10 @@
  * :5000), serves her controller page, /status and /chirp on :5014, and sends the fleet's ESP-NOW
  * "I'm here" beacon.
  *
- * The fleet can look at her and hear her. It can't fly her: nothing here touches a motor, a setpoint
- * or the commander, and RIFT lists no action that moves her. Flight comes first:
+ * The fleet can look at her and hear her. It can't fly her: RIFT lists no action that moves her, and
+ * the browser's /fly-ws only takes a client on her own WiFi, never one on the fleet's network. What it
+ * gets goes through the same queue as the app's UDP, so her thrust lock and watchdog still hold.
+ * Flight comes first:
  *   - every task here runs at the lowest priority, far under the stabilizer;
  *   - while her motors are spinning she doesn't scan, join or chirp, because a WiFi scan leaves the
  *     channel and would cut the app that's flying her.
@@ -24,6 +26,7 @@
 #include "esp_http_server.h"
 #include "esp_netif.h"
 #include "esp_now.h"
+#include "lwip/sockets.h"
 #include "esp_wifi.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
@@ -182,6 +185,9 @@ static void chirpTask(void *arg)
 extern const char index_html_start[] asm("_binary_index_html_start");
 extern const char style_css_start[] asm("_binary_style_css_start");
 extern const char app_js_start[] asm("_binary_app_js_start");
+extern const char fly_html_start[] asm("_binary_fly_html_start");
+extern const char fly_css_start[] asm("_binary_fly_css_start");
+extern const char fly_js_start[] asm("_binary_fly_js_start");
 
 static esp_err_t sendFile(httpd_req_t *req, const char *type, const char *text)
 {
@@ -202,6 +208,51 @@ static esp_err_t styleGet(httpd_req_t *req)
 static esp_err_t scriptGet(httpd_req_t *req)
 {
     return sendFile(req, "text/javascript", app_js_start);
+}
+
+static esp_err_t flyPageGet(httpd_req_t *req)
+{
+    return sendFile(req, "text/html", fly_html_start);
+}
+
+static esp_err_t flyStyleGet(httpd_req_t *req)
+{
+    return sendFile(req, "text/css", fly_css_start);
+}
+
+static esp_err_t flyScriptGet(httpd_req_t *req)
+{
+    return sendFile(req, "text/javascript", fly_js_start);
+}
+
+static bool onOwnWifi(httpd_req_t *req)
+{
+    struct sockaddr_in6 peer;
+    socklen_t len = sizeof(peer);
+    if (getpeername(httpd_req_to_sockfd(req), (struct sockaddr *)&peer, &len) != 0) {
+        return false;
+    }
+    return ariaOnOwnWifi(ntohl(peer.sin6_addr.un.u32_addr[3]));
+}
+
+// Flying from the browser: one frame of roll, pitch, yaw and thrust each. When it stops, her
+// firmware's own watchdog levels her at 0.5 s and cuts the motors at 2 s.
+static esp_err_t flySocket(httpd_req_t *req)
+{
+    if (!onOwnWifi(req)) {
+        httpd_resp_send_err(req, HTTPD_403_FORBIDDEN, "only on her own WiFi");
+        return ESP_FAIL;
+    }
+    if (req->method == HTTP_GET) {
+        return ESP_OK;          // the handshake
+    }
+    uint8_t in[ARIA_FLY_BYTES], packet[ARIA_FLY_PACKET];
+    httpd_ws_frame_t frame = {.type = HTTPD_WS_TYPE_BINARY, .payload = in};
+    if (httpd_ws_recv_frame(req, &frame, sizeof(in)) == ESP_OK && frame.len == sizeof(in)) {
+        ariaFlyPacket(in, packet);
+        wifiInjectPacket(packet, sizeof(packet));
+    }
+    return ESP_OK;
 }
 
 static esp_err_t sendJson(httpd_req_t *req, const char *json)
@@ -257,13 +308,18 @@ void ariaFleetStart(esp_netif_t *sta)
     cfg.server_port = ARIA_PORT;
     cfg.ctrl_port = ARIA_PORT + 1;
     cfg.task_priority = FLEET_TASK_PRI;
-    cfg.max_open_sockets = 3;
+    cfg.max_open_sockets = 4;
+    cfg.max_uri_handlers = 12;
     httpd_handle_t server = NULL;
     if (httpd_start(&server, &cfg) == ESP_OK) {
         const httpd_uri_t routes[] = {
             {.uri = "/", .method = HTTP_GET, .handler = pageGet},
             {.uri = "/style.css", .method = HTTP_GET, .handler = styleGet},
             {.uri = "/app.js", .method = HTTP_GET, .handler = scriptGet},
+            {.uri = "/fly", .method = HTTP_GET, .handler = flyPageGet},
+            {.uri = "/fly.css", .method = HTTP_GET, .handler = flyStyleGet},
+            {.uri = "/fly.js", .method = HTTP_GET, .handler = flyScriptGet},
+            {.uri = "/fly-ws", .method = HTTP_GET, .handler = flySocket, .is_websocket = true},
             {.uri = "/status", .method = HTTP_GET, .handler = statusGet},
             {.uri = "/ping", .method = HTTP_GET, .handler = pingGet},
             {.uri = "/chirp", .method = HTTP_GET, .handler = chirpGet},

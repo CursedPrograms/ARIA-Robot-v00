@@ -189,6 +189,19 @@ static void udp_server_rx_task(void *pvParameters)
     }
 }
 
+#ifdef CONFIG_ARIA_FLEET
+bool wifiInjectPacket(const uint8_t *data, uint8_t size)
+{
+    UDPPacket packet = {0};
+    if (udpDataRx == NULL || size > sizeof(packet.data)) {
+        return false;
+    }
+    packet.size = size;
+    memcpy(packet.data, data, size);
+    return xQueueSend(udpDataRx, &packet, 0) == pdTRUE;
+}
+#endif
+
 static void udp_server_tx_task(void *pvParameters)
 {
     UDPPacket outPacket = {0};
