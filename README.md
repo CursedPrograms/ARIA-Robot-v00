@@ -1,5 +1,5 @@
 [![Twitter: @NorowaretaGemu](https://img.shields.io/badge/X-@NorowaretaGemu-blue.svg?style=flat)](https://x.com/NorowaretaGemu)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 <br>
 <div align="center">
@@ -16,7 +16,10 @@
 
 - Robot Type: Drone
 - Based on: [ESP-Drone](https://github.com/espressif/esp-drone) (Espressif, GPL-3.0; its flight core comes from Crazyflie)
-- Status: just started. Her board and firmware aren't built yet.
+- Firmware: `scripts/esp-drone`, ESP-Drone 9d5a4f8 (2026-10-26), unchanged so far. Builds with ESP-IDF v5.5 or v6.1.
+- Licence: GPL-3.0, as ESP-Drone's
+- Colours: cyan and white, like clouds
+- Status: just started. Her board isn't built, and her firmware hasn't been compiled or flown yet.
 - Site: https://cursedprograms.github.io/ARIA-Robot-v00/
 
 ARIA is the flying member of the DREAM Robotics fleet. The plan is the same as the rest of the fleet: she joins RIFT's network, answers `/status`, and talks to the others. ESP-Drone already gives her Wi-Fi control from an app or gamepad, stabilize mode, and height-hold and position-hold with extension boards.

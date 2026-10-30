@@ -1,16 +1,16 @@
 /* DREAM Robotics site stylesheet: layout shared by every robot, ARIA's colours
-   (sky blue and sunrise amber). */
+   (cyan sky and white clouds). */
 :root {
-  --bg: #060A12;
-  --panel: #0C1422;
-  --border: #1A2A44;
-  --accent: #3CB4FF;
-  --accent2: #FFB43C;
-  --green: #00ff88;
-  --text: #E9F1F2;
-  --sub: #94A7A8;
-  --glow: 60, 180, 255;
-  --glow2: 255, 180, 60;
+  --bg: #E6FAFD;
+  --panel: #FFFFFF;
+  --border: #B5EAF2;
+  --accent: #0891B2;
+  --accent2: #22D3EE;
+  --green: #0E9F6E;
+  --text: #0B3A44;
+  --sub: #3E6E79;
+  --glow: 34, 211, 238;
+  --glow2: 255, 255, 255;
   --mono: ui-monospace, "Cascadia Code", Consolas, "SF Mono", Menlo, monospace;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }

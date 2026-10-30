@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Colour scheme for ARIA: cyan sky and white clouds.
+  Used by the GitHub Pages site (index.html) and any UI that loads it.
+
+  Format: one colour per line, written exactly as  name="..." value="#RRGGBB".
+-->
+<colour_scheme>
+  <!-- Surfaces -->
+  <colour name="background"       value="#E6FAFD"/>  <!-- the sky, pale -->
+  <colour name="panel"            value="#FFFFFF"/>  <!-- clouds: cards, panels -->
+  <colour name="border"           value="#B5EAF2"/>  <!-- panel edges -->
+  <colour name="divider"          value="#D3F3F8"/>  <!-- lines between rows -->
+
+  <!-- Text -->
+  <colour name="text"             value="#0B3A44"/>  <!-- primary text -->
+  <colour name="text_sec"         value="#3E6E79"/>  <!-- secondary text -->
+  <colour name="text_dim"         value="#6F97A1"/>  <!-- labels -->
+
+  <!-- Accents -->
+  <colour name="accent"           value="#0891B2"/>  <!-- her cyan, dark enough to read on white -->
+  <colour name="accent_hover"     value="#06B6D4"/>  <!-- lighter cyan -->
+  <colour name="accent2"          value="#22D3EE"/>  <!-- bright cyan -->
+</colour_scheme>
