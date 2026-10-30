@@ -15,10 +15,11 @@
 ## Aerial Roaming Intelligent Automaton
 
 - Robot Type: Drone
-- Status: just started. Her hardware, firmware and flight code aren't written yet.
+- Based on: [ESP-Drone](https://github.com/espressif/esp-drone) (Espressif, GPL-3.0; its flight core comes from Crazyflie)
+- Status: just started. Her board and firmware aren't built yet.
 - Site: https://cursedprograms.github.io/ARIA-Robot-v00/
 
-ARIA is the flying member of the DREAM Robotics fleet. The plan is the same as the rest of the fleet: she joins RIFT's network, answers `/status`, and talks to the others.
+ARIA is the flying member of the DREAM Robotics fleet. The plan is the same as the rest of the fleet: she joins RIFT's network, answers `/status`, and talks to the others. ESP-Drone already gives her Wi-Fi control from an app or gamepad, stabilize mode, and height-hold and position-hold with extension boards.
 
 Credit: [Farica☆Kimora](https://github.com/Farica-Kimora) © Cursed Entertainment
 
