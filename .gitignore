@@ -3,3 +3,7 @@ __pycache__/
 venv/
 build/
 .vscode/
+
+# Controllers, built and kept
+!builds/
+!builds/*.exe

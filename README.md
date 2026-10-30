@@ -98,6 +98,24 @@ Credit: [Farica☆Kimora](https://github.com/Farica-Kimora) © Cursed Entertainm
 </a>
 </div>
 
+**Windows controller:** [`builds/ARIA-Controller.exe`](builds/ARIA-Controller.exe) shows ARIA's own web page in a window, so it always matches the page. Source: `scripts/web_controller`.
+
+## Related Projects
+
+- [KIDA-Robot-v01](https://github.com/CursedPrograms/KIDA-Robot-v01)
+- [KIDA-Robot-v00](https://github.com/CursedPrograms/KIDA-Robot-v00)
+- [WHIP-Robot-v00](https://github.com/CursedPrograms/WHIP-Robot-v00)
+- [NORA-Robot-v00](https://github.com/CursedPrograms/NORA-Robot-v00)
+- [MILA-Robot-v00](https://github.com/CursedPrograms/MILA-Robot-v00)
+- [NIKA-Robot-v00](https://github.com/CursedPrograms/NIKA-Robot-v00)
+- [IDA-Robot-v00](https://github.com/CursedPrograms/IDA-Robot-v00)
+- [ARM-Robot-v01](https://github.com/CursedPrograms/ARM-Robot-v01)
+- [DREAM](https://github.com/CursedPrograms/DREAM)
+- [RIFT](https://github.com/CursedPrograms/RIFT)
+- [RITA](https://github.com/CursedPrograms/RITA)
+- [NINA](https://github.com/CursedPrograms/NINA)
+- [TINA](https://github.com/CursedPrograms/TINA)
+
 ---
 
 <!-- DREAM-ECOSYSTEM:START -->
