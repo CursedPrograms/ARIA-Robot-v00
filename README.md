@@ -125,8 +125,6 @@ She climbs the ladder too: every minute she looks for a higher fleet network, bu
 
 ARIA is the flying member of the DREAM Robotics fleet. The plan is the same as the rest of the fleet: she joins RIFT's network, answers `/status`, and talks to the others. CF-Drone gives her stabilised flight, a web remote and a debug console, and QGroundControl, ELRS or SBUS can fly her too. Her spare headers take a barometer, laser rangefinder, compass and optical flow sensor.
 
-Credit: [Farica☆Kimora](https://github.com/Farica-Kimora) © Cursed Entertainment
-
 ---
 
 <div align="center">&copy; Cursed Entertainment 2026</div>
