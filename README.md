@@ -20,6 +20,19 @@
 - Licence: GPL-3.0, as ESP-Drone's
 - Colours: cyan and white, like clouds
 - Status: just started. Her board isn't built, and her firmware hasn't been compiled or flown yet.
+
+### In the fleet
+
+`CONFIG_ARIA_FLEET`, on by default (`components/drivers/general/wifi/aria_fleet.c`):
+
+- **RIFT:** she keeps her own AP for the app and joins the highest fleet network she can see, then registers with whoever hosts the list. She only ever joins, she never hosts.
+- **`:5014`:** `GET /status` (flying, battery, network, signal), `GET /ping`, `GET /chirp?u=<0-16>`.
+- **ESP-NOW:** the fleet's "I'm here" beacon twice a second, saying "park" or "go". She sends it and doesn't listen, like MILA and NIKA.
+- **Brainfuck:** the fleet's phrases, a tone per symbol on the buzzer deck and a flash of her blue LED, so she talks with or without the buzzer.
+- **Safety:** the fleet can look at her and hear her, nothing in it can arm or fly her. It runs at the lowest priority, and with her motors spinning she won't scan, join a network or chirp, because a scan would cut the app flying her.
+- **Her WiFi channel is 1**, the fleet's (ESP-Drone's default was 6).
+
+Not done: the ladder's climbing while she's on a lower network (she looks again only when she has no network), and following a host's change mid-flight.
 - Site: https://cursedprograms.github.io/ARIA-Robot-v00/
 
 ARIA is the flying member of the DREAM Robotics fleet. The plan is the same as the rest of the fleet: she joins RIFT's network, answers `/status`, and talks to the others. ESP-Drone already gives her Wi-Fi control from an app or gamepad, stabilize mode, and height-hold and position-hold with extension boards.

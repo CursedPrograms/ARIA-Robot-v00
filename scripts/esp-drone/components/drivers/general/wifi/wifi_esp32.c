@@ -17,6 +17,7 @@
 
 #include "queuemonitor.h"
 #include "wifi_esp32.h"
+#include "aria_fleet.h"
 #include "stm32_legacy.h"
 #define DEBUG_MODULE  "WIFI_UDP"
 #include "debug_cf.h"
@@ -311,6 +312,9 @@ void wifiInit(void)
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     ap_netif = esp_netif_create_default_wifi_ap();
+#ifdef CONFIG_ARIA_FLEET
+    esp_netif_t *sta_netif = esp_netif_create_default_wifi_sta();
+#endif
     uint8_t mac[6];
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -346,7 +350,11 @@ void wifiInit(void)
         wifi_config.ap.authmode = WIFI_AUTH_OPEN;
     }
 
+#ifdef CONFIG_ARIA_FLEET
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));   // her own AP for the app, and the fleet's network
+#else
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
+#endif
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
     ESP_ERROR_CHECK(esp_wifi_start());
     esp_wifi_set_channel(WIFI_CH, WIFI_SECOND_CHAN_NONE);
@@ -366,6 +374,9 @@ void wifiInit(void)
     ESP_ERROR_CHECK(esp_netif_set_ip_info(ap_netif, &ip_info));
     ESP_ERROR_CHECK(esp_netif_dhcps_start(ap_netif));
     DEBUG_PRINT_LOCAL("wifi_init_softap complete.SSID:%s password:%s", WIFI_SSID, WIFI_PWD);
+#ifdef CONFIG_ARIA_FLEET
+    ariaFleetStart(sta_netif);
+#endif
 
     if (udp_server_create(NULL) == ESP_FAIL) {
         DEBUG_PRINT_LOCAL("UDP server create socket failed");

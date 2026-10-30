@@ -105,10 +105,22 @@ menu "ESPDrone Config"
             default "12345678"
             help
                 Wi-Fi Password, empty for an open AP or 8-63 characters
+        config ARIA_FLEET
+            bool "ARIA: join the DREAM Robotics fleet"
+            default y
+            help
+                Joins the fleet's WiFi, registers with RIFT, answers /status and /chirp on :5014 and
+                sends the fleet's ESP-NOW beacon. Never moves her.
+
+        config ARIA_FLEET_PASSWORD
+            string "The fleet's WiFi password"
+            depends on ARIA_FLEET
+            default "mmvbkbak"
+
         config WIFI_CHANNEL
             int "Wi-Fi/ESP-Now Channel"
             range 1 13
-            default 6
+            default 1
             help
                 Wi-Fi/ESP-Now Channel, 1-13
         config WIFI_MAX_STA_CONN
