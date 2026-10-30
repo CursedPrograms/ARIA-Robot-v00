@@ -10,9 +10,11 @@
  * Flight comes first:
  *   - all of this runs on core 0 at the lowest priority; the flight loop has core 1;
  *   - while she's armed she doesn't scan, join or chirp, because a WiFi scan leaves the channel and
- *     would cut the app that's flying her.
+ *     would cut the app that's flying her. She only looks for a higher network on the ground with
+ *     nobody on her own WiFi, for the same reason.
  */
 #include <Arduino.h>
+#include <ESPmDNS.h>
 #include <WiFi.h>
 
 #include <stdio.h>
@@ -39,6 +41,7 @@
 #define BEACON_MS 500
 #define REGISTER_MS 10000
 #define RETRY_NETWORK_MS 30000
+#define CLIMB_MS 60000
 #define UDP_PORT 2390
 #define FLEET_PASSWORD "mmvbkbak"
 
@@ -71,9 +74,10 @@ static void joinFleet()
         names[i] = (const char *)seen[i].ssid;
     }
     const char *best = ariaBestNetwork(names, count);
-    if (!best) {
+    if (!best || strcmp(best, joined) == 0 || armed) {
         return;
     }
+    esp_wifi_disconnect();        // the ladder: leaving a lower network for this one
     wifi_config_t sta = {};
     strlcpy((char *)sta.sta.ssid, best, sizeof(sta.sta.ssid));
     strlcpy((char *)sta.sta.password, FLEET_PASSWORD, sizeof(sta.sta.password));
@@ -141,7 +145,7 @@ static void fleetTask(void *arg)
     esp_now_add_peer(&peer);
     esp_now_register_recv_cb(beaconHeard);
 
-    uint32_t nextRegister = 0, nextLook = 0;
+    uint32_t nextRegister = 0, nextLook = 0, nextClimb = CLIMB_MS;
     while (true) {
         const uint32_t now = millis();
         sendBeacon();
@@ -155,6 +159,9 @@ static void fleetTask(void *arg)
         } else if ((int32_t)(now - nextRegister) >= 0) {
             nextRegister = now + REGISTER_MS;
             registerWithFleet();
+        } else if (!armed && WiFi.softAPgetStationNum() == 0 && (int32_t)(now - nextClimb) >= 0) {
+            nextClimb = now + CLIMB_MS;
+            joinFleet();
         }
         delay(BEACON_MS);
     }
@@ -309,6 +316,8 @@ void ariaFleetStart()
 {
     staNetif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
     chirpQueue = xQueueCreate(2, sizeof(int));
+    MDNS.begin("aria");           // http://aria.local:5014 on the fleet's network
+    MDNS.addService("http", "tcp", ARIA_PORT);
 
     httpd_config_t cfg = HTTPD_DEFAULT_CONFIG();
     cfg.server_port = ARIA_PORT;

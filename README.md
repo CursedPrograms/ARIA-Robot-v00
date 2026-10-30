@@ -73,7 +73,7 @@ Her logic tests: `g++ -std=c++17 -mno-ms-bitfields -Iscripts/aria_flight -Iscrip
 
 `python scripts/fake_aria.py` is a pretend ARIA on this PC, for trying the page and RIFT's link with no drone.
 
-Not done: the ladder's climbing while she's on a lower network (she looks again only when she has no network), and following a host's change mid-flight.
+She climbs the ladder too: every minute she looks for a higher fleet network, but only on the ground with nobody on her own WiFi, so a scan can't cut the phone flying her. On the fleet's network she's also `http://aria.local:5014`.
 - Site: https://cursedprograms.github.io/ARIA-Robot-v00/
 
 <div align="center">
