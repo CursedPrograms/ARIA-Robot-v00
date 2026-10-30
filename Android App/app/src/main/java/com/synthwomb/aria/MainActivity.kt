@@ -125,6 +125,7 @@ class MainActivity : Activity(), InputManager.InputDeviceListener {
             addView(android.widget.HorizontalScrollView(context).apply { addView(tiles) })
             addView(sticks, LinearLayout.LayoutParams(-1, 0, 1f))
         })
+        showSplash()
 
         bluetooth = AriaBluetooth(this) { text -> runOnUiThread { state.text = text } }
         link = AriaLink(this, bluetooth) { s, near -> runOnUiThread { showStatus(s, near) } }

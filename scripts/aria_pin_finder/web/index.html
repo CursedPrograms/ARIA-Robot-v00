@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARIA pin finder</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<h1>ARIA pin finder</h1>
+<p class="warn">Propellers off before pressing anything.</p>
+<section class="row">
+  <button data-cmd="i">Chip</button>
+  <button data-cmd="g">Find gyro</button>
+  <button data-cmd="a">Find battery</button>
+  <button data-cmd="w">Walk all pins</button>
+  <button data-cmd="x" class="stop">STOP</button>
+</section>
+<h2>Pulse one pin</h2>
+<section class="row" id="pins"></section>
+<h2>Try gyro pins</h2>
+<form id="spi" class="row">
+  <input name="sck" placeholder="SCK" inputmode="numeric">
+  <input name="miso" placeholder="MISO" inputmode="numeric">
+  <input name="mosi" placeholder="MOSI" inputmode="numeric">
+  <input name="cs" placeholder="CS" inputmode="numeric">
+  <button>Try</button>
+</form>
+<pre id="log">...</pre>
+<script src="/app.js"></script>
+</body>
+</html>

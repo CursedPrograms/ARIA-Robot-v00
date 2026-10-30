@@ -19,7 +19,7 @@ import java.nio.ByteOrder
 import java.util.UUID
 
 /**
- * Her Bluetooth link (aria_ble.c, ESP32-S3): scan for her service, connect, and Android pairs on the
+ * Her Bluetooth link (aria_ble.cpp): scan for her service, connect, and Android pairs on the
  * first write, because her flight characteristic needs an encrypted link. New phones can only pair in
  * her first two minutes after power-up. A paired phone is remembered, so it reconnects straight away.
  */

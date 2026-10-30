@@ -1,0 +1,88 @@
+// WiFi support
+
+#if WIFI_ENABLED
+
+#include <WiFi.h>
+#include <WiFiAP.h>
+#include <WiFiUdp.h>
+#include "Preferences.h"
+
+extern Preferences storage; // shares the main storage
+
+const int W_DISABLED = 0, W_AP = 1, W_STA = 2;
+int wifiMode = W_AP;
+int udpLocalPort = 14550;
+int udpRemotePort = 14550;
+IPAddress udpRemoteIP = "255.255.255.255";
+
+WiFiUDP udp;
+
+void setupWiFi() {
+	print("Setup Wi-Fi\n");
+	WiFi.setSleep(false); // disable power save - must be set before softAP/begin
+	if (wifiMode == W_AP) {
+		// ARIA: AP and client together, to join the fleet; IP as her app and ESP-Drone's; channel 1, the fleet's
+		WiFi.mode(WIFI_AP_STA);
+		WiFi.softAPConfig(IPAddress(192, 168, 43, 42), IPAddress(192, 168, 43, 42), IPAddress(255, 255, 255, 0));
+		WiFi.softAP(
+			storage.getString("WIFI_AP_SSID", "ARIA").c_str(),
+			storage.getString("WIFI_AP_PASS", "12345678").c_str(),
+			1
+		);
+	} else if (wifiMode == W_STA) {
+		WiFi.begin(
+			storage.getString("WIFI_STA_SSID", "").c_str(),
+			storage.getString("WIFI_STA_PASS", "").c_str()
+		);
+	}
+	udp.begin(udpLocalPort);
+}
+
+void sendWiFi(const uint8_t *buf, int len) {
+	if (WiFi.softAPgetStationNum() == 0 && !WiFi.isConnected()) return;
+	udp.beginPacket(udpRemoteIP, udpRemotePort);
+	udp.write(buf, len);
+	udp.endPacket();
+}
+
+int receiveWiFi(uint8_t *buf, int len) {
+	udp.parsePacket();
+	if (udp.remoteIP()) udpRemoteIP = udp.remoteIP();
+	return udp.read(buf, len);
+}
+
+void printWiFiInfo() {
+	if (WiFi.getMode() == WIFI_MODE_AP) {
+		print("Mode: Access Point (AP)\n");
+		print("MAC: %s\n", WiFi.softAPmacAddress().c_str());
+		print("SSID: %s\n", WiFi.softAPSSID().c_str());
+		print("Password: ***\n");
+		print("Clients: %d\n", WiFi.softAPgetStationNum());
+		print("IP: %s\n", WiFi.softAPIP().toString().c_str());
+	} else if (WiFi.getMode() == WIFI_MODE_STA) {
+		print("Mode: Client (STA)\n");
+		print("Connected: %d\n", WiFi.isConnected());
+		print("MAC: %s\n", WiFi.macAddress().c_str());
+		print("SSID: %s\n", WiFi.SSID().c_str());
+		print("Password: ***\n");
+		print("IP: %s\n", WiFi.localIP().toString().c_str());
+	} else {
+		print("Mode: Disabled\n");
+		return;
+	}
+	print("Remote IP: %s\n", udpRemoteIP.toString().c_str());
+	print("MAVLink connected: %d\n", mavlinkConnected);
+}
+
+void configWiFi(bool ap, const char *ssid, const char *password) {
+	if (ap) {
+		storage.putString("WIFI_AP_SSID", ssid);
+		storage.putString("WIFI_AP_PASS", password);
+	} else {
+		storage.putString("WIFI_STA_SSID", ssid);
+		storage.putString("WIFI_STA_PASS", password);
+	}
+	print("Reboot to apply new settings\n");
+}
+
+#endif
