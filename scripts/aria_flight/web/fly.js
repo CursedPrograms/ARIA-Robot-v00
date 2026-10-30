@@ -101,6 +101,40 @@ if (typeof module !== "undefined") {
     stick("right", function (x, y) { sticks.roll = x; sticks.pitch = -y; },
           function () { sticks.roll = 0; sticks.pitch = 0; });
 
+    // The keyboard: the same rules as the sticks. W held is the throttle, so letting go powers her
+    // down. A second's hold on Enter arms her. Space stops her, and so does leaving the window.
+    var held = {};
+    function fromKeys() {
+      sticks.throttle = held.w ? 1 : null;
+      sticks.yaw = (held.d ? 1 : 0) - (held.a ? 1 : 0);
+      sticks.roll = (held.arrowright ? 1 : 0) - (held.arrowleft ? 1 : 0);
+      sticks.pitch = (held.arrowup ? 1 : 0) - (held.arrowdown ? 1 : 0);
+    }
+    function tryArm() {
+      if (flight.arm(sticks.throttle)) {
+        armBtn.textContent = "ARMED";
+        armBtn.className = "armed";
+      } else {
+        state.textContent = "Throttle down first";
+      }
+    }
+    window.addEventListener("keydown", function (e) {
+      var k = e.key.toLowerCase();
+      if (k === " ") { e.preventDefault(); disarm(); }
+      else if (k === "enter") { if (!e.repeat) armTimer = setTimeout(tryArm, 1000); }
+      else if (["w", "a", "d", "arrowup", "arrowdown", "arrowleft", "arrowright"].indexOf(k) >= 0) {
+        e.preventDefault();
+        held[k] = true;
+        fromKeys();
+      }
+    });
+    window.addEventListener("keyup", function (e) {
+      var k = e.key.toLowerCase();
+      if (k === "enter") clearTimeout(armTimer);
+      else { delete held[k]; fromKeys(); }
+    });
+    window.addEventListener("blur", function () { held = {}; fromKeys(); disarm(); });
+
     // A second's hold, so a stray thumb can't arm her
     armBtn.addEventListener("pointerdown", function () {
       armTimer = setTimeout(function () {

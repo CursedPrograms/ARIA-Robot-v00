@@ -30,3 +30,4 @@ main { flex: 1; display: flex; justify-content: space-around; align-items: cente
 .stick span { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font-size: 12px; pointer-events: none; }
 .knob { position: absolute; left: 50%; top: 50%; width: 22%; height: 22%; margin: -11% 0 0 -11%; border-radius: 50%; background: var(--border); pointer-events: none; }
 .stick.held .knob { background: var(--bright); }
+.keys { margin: 6px 0; text-align: center; font-size: 13px; opacity: .75; }

@@ -36,6 +36,8 @@
 
 ---
 
+**Keyboard on her fly page:** hold Enter a second to arm, hold W for throttle, A D to turn, arrows to tilt, Space stops. Let go of W and she powers down; leaving the window disarms her.
+
 ## Related Projects
 
 

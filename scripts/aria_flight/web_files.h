@@ -110,6 +110,7 @@ main { flex: 1; display: flex; justify-content: space-around; align-items: cente
 .stick span { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font-size: 12px; pointer-events: none; }
 .knob { position: absolute; left: 50%; top: 50%; width: 22%; height: 22%; margin: -11% 0 0 -11%; border-radius: 50%; background: var(--border); pointer-events: none; }
 .stick.held .knob { background: var(--bright); }
+.keys { margin: 6px 0; text-align: center; font-size: 13px; opacity: .75; }
 )WEBFILE";
 
 static const char WEB_FLY_HTML[] = R"WEBFILE(<!DOCTYPE html>
@@ -136,6 +137,7 @@ static const char WEB_FLY_HTML[] = R"WEBFILE(<!DOCTYPE html>
   <div class="stick" id="left"><div class="knob"></div><span>throttle + turn: lift off to power down</span></div>
   <div class="stick" id="right"><div class="knob"></div><span>tilt</span></div>
 </main>
+<p class="keys">Keys: hold Enter to arm, hold W for throttle, A D turn, arrows tilt, Space stops</p>
 </body>
 </html>
 )WEBFILE";
@@ -242,6 +244,40 @@ if (typeof module !== "undefined") {
           function () { sticks.yaw = 0; sticks.throttle = null; });
     stick("right", function (x, y) { sticks.roll = x; sticks.pitch = -y; },
           function () { sticks.roll = 0; sticks.pitch = 0; });
+
+    // The keyboard: the same rules as the sticks. W held is the throttle, so letting go powers her
+    // down. A second's hold on Enter arms her. Space stops her, and so does leaving the window.
+    var held = {};
+    function fromKeys() {
+      sticks.throttle = held.w ? 1 : null;
+      sticks.yaw = (held.d ? 1 : 0) - (held.a ? 1 : 0);
+      sticks.roll = (held.arrowright ? 1 : 0) - (held.arrowleft ? 1 : 0);
+      sticks.pitch = (held.arrowup ? 1 : 0) - (held.arrowdown ? 1 : 0);
+    }
+    function tryArm() {
+      if (flight.arm(sticks.throttle)) {
+        armBtn.textContent = "ARMED";
+        armBtn.className = "armed";
+      } else {
+        state.textContent = "Throttle down first";
+      }
+    }
+    window.addEventListener("keydown", function (e) {
+      var k = e.key.toLowerCase();
+      if (k === " ") { e.preventDefault(); disarm(); }
+      else if (k === "enter") { if (!e.repeat) armTimer = setTimeout(tryArm, 1000); }
+      else if (["w", "a", "d", "arrowup", "arrowdown", "arrowleft", "arrowright"].indexOf(k) >= 0) {
+        e.preventDefault();
+        held[k] = true;
+        fromKeys();
+      }
+    });
+    window.addEventListener("keyup", function (e) {
+      var k = e.key.toLowerCase();
+      if (k === "enter") clearTimeout(armTimer);
+      else { delete held[k]; fromKeys(); }
+    });
+    window.addEventListener("blur", function () { held = {}; fromKeys(); disarm(); });
 
     // A second's hold, so a stray thumb can't arm her
     armBtn.addEventListener("pointerdown", function () {
