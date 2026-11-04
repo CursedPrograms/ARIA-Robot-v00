@@ -108,6 +108,7 @@ static inline void ariaNearJson(AriaPeer *peers, uint32_t nowMs, char *out, size
 static const char *const ARIA_LADDER[] = {
     "RIFT", "DREAM", "NINA", "TINA",
     "NORACTL", "WHIPCTL", "KIDA01CTL", "KIDA00CTL", "ARMCTL",
+    "RITA",
     "NORA", "WHIP", "KIDA01", "KIDA00", "ARM", "MILA", "NIKA",
 };
 

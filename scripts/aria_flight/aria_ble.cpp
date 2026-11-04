@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "aria_link_logic.h"
+#include "fleet_bt_ble.h"   // the fleet's one Bluetooth protocol, over BLE (RIFT/Fleet/esp32)
 
 #if defined(CONFIG_NIMBLE_ENABLED)
 #include "host/ble_hs.h"
@@ -136,6 +137,11 @@ void ariaBleStart()
     fly->setCallbacks(new Fly());
     state->setCallbacks(new State());
     service->start();
+
+    // The fleet's Bluetooth (fleet_bt_ble.h): her status, who's near and her phrases, the same requests
+    // as over WiFi on :5014. Only those: flying stays on her paired app (the FLY characteristic above).
+    static const char *const FLEET_OVER_BT[] = {"/status", "/near", "/ping", "/chirp", nullptr};
+    fleetBtBleAttach(server, 5014, FLEET_OVER_BT);   // her fleet port (ARIA_PORT, aria_fleet_logic.h)
 
     knownBonds = bondCount();
     BLEAdvertising *advertising = BLEDevice::getAdvertising();

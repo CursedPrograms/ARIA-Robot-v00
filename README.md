@@ -178,6 +178,13 @@ ARIA is the flying member of the DREAM Robotics fleet. The plan is the same as t
 
 ---
 
+## Bluetooth
+
+The fleet has **one Bluetooth protocol** (`fleet_bt`, master copy in [RIFT](https://github.com/CursedPrograms/RIFT)'s `Fleet/`): a controller sends exactly the web request it would send over WiFi, one per line (`>GET /status`, `>POST /command<TAB>{...}`), and the robot asks its own web server and answers `<code> <length>` and the body. So every command works the same both ways, including new ones, and so does every rule: the PIN, the locks, the robot's own stops.
+
+- **ARIA** carries it over **Bluetooth LE** (`scripts/aria_flight/fleet_bt_ble.h`, the standard Nordic UART service), since her ESP32-C3 / S3 boards have no Classic Bluetooth. Python: `fleet_bt.BtSession("ble:ARIA")`.
+- **Only** `/status`, `/near`, `/ping` and `/chirp` answer over it: **flying stays on her paired app** (her own encrypted FLY characteristic and its pairing window), and `/chirp` still refuses while she's armed.
+
 <!-- DREAM-ECOSYSTEM:START -->
 ## The DREAM Robotics ecosystem
 
