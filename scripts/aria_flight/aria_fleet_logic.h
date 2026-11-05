@@ -106,7 +106,7 @@ static inline void ariaNearJson(AriaPeer *peers, uint32_t nowMs, char *out, size
 
 // The ladder, highest first (RIFT/Fleet/fleet_ladder.py). She joins, she never hosts.
 static const char *const ARIA_LADDER[] = {
-    "RIFT", "DREAM", "NINA", "TINA",
+    "RIFT", "DREAM", "NINA", "TINA", "AURA",
     "NORACTL", "WHIPCTL", "KIDA01CTL", "KIDA00CTL", "ARMCTL",
     "RITA",
     "NORA", "WHIP", "KIDA01", "KIDA00", "ARM", "MILA", "NIKA",
