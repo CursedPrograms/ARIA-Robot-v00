@@ -23,12 +23,11 @@
 ---
 
 - Robot Type: Drone
-- Hardware: Diymore ESP32 Drone DIY Kit E1, on order: the CHERGLOW (琛光) E1 Mini, MPU6500 gyro over SPI. Sold as an ESP32-S3 with 716 motors, but her manual and the open design say a plain 30-pin ESP32 with 8520 motors, so the chip gets confirmed when she arrives. 3.7 V single-cell LiPo, not included.
-- Based on: [CF-Drone](https://github.com/songge8/CF-Drone) e7f507f (CHERGLOW / songge8, built on [Flix](https://github.com/okalachev/flix) and ESP-Drone), her kit's own flight firmware. Her S3 pins come from [RayCyder/CF-Drone](https://github.com/RayCyder/CF-Drone), her hardware design is at [oshwhub](https://oshwhub.com/songge8/project_qqqyfdkm).
-- Firmware: `scripts/aria_flight` (Arduino, English throughout), for a plain ESP32 or an S3.
-- Licence: GPL-3.0 with CF-Drone's additional terms (`scripts/aria_flight/LICENSE`). Personal and non-commercial use is exempt from those terms; selling her firmware or hardware isn't allowed without CHERGLOW's permission.
-- Colours: cyan and white, like clouds
-- Status: her firmware compiles for both chips and her link rules pass their tests on a PC. It has never run on her: she hasn't arrived, and nothing here is flight-tested.
+
+<div align="center">
+  <img src="images/aria_avatar.jpg" alt="ARIA avatar: a human representation of the drone" width="320"/>
+  <p><i>ARIA</i></p>
+</div>
 
 ---
 
@@ -38,8 +37,9 @@
 
 **Keyboard on her fly page:** hold Enter a second to arm, hold W for throttle, A D to turn, arrows to tilt, Space stops. Let go of W and she powers down; leaving the window disarms her.
 
-## Related Projects
+---
 
+## Related Projects
 
 <table>
   <tr>
@@ -63,31 +63,20 @@
 
 ---
 
-## Her pages
+## Overview
 
-<div align="center">
-  <img src="images/screenshots/controller-page.png" alt="ARIA's controller page, on a pretend ARIA" width="320"/>
-  <img src="images/screenshots/fly-page.png" alt="Flying ARIA from a browser" width="520"/>
-</div>
+**Website: <https://cursedprograms.github.io/ARIA-Robot-v00/>**
 
----
+ARIA is the flying member of the DREAM Robotics fleet. The plan is the same as the rest of the fleet: she joins RIFT's network, answers `/status`, and talks to the others. CF-Drone gives her stabilised flight, a web remote and a debug console, and QGroundControl, ELRS or SBUS can fly her too. Her spare headers take a barometer, laser rangefinder, compass and optical flow sensor.
 
-## In the fleet
+She's waiting to arrive: her flight firmware is ready, her pages and fleet link are tested on a PC, and nothing has flown yet.
 
-On top of CF-Drone (`scripts/aria_flight/aria_fleet.cpp`, `aria_ble.cpp`, `link_aria.ino`):
-
-- **RIFT:** she keeps her own AP for the app and joins the highest fleet network she can see, then registers with whoever hosts the list. She only ever joins, she never hosts.
-- **`:5014`:** her controller page (`web/`, RIFT's Open button), `GET /status` (flying, battery, network, signal), `GET /ping`, `GET /chirp?u=<0-16>`.
-- **ESP-NOW:** the fleet's "I'm here" beacon twice a second, saying "park" or "go", and she hears everyone else's: `/near`.
-- **Little windows:** her app and page show battery, pitch, roll, signal and network, and each nearby robot with a rough distance. It's from radio strength, so walls and antennas change it: hence the ~.
-- **Brainfuck:** the fleet's phrases as flashes of her LED, on the ground only. The kit has no buzzer, and the S3 board has no spare LED, so there she stays quiet.
-- **Flying from a browser:** on her own WiFi, `http://192.168.43.42:5014/fly` has two sticks over a WebSocket (`/fly-ws`). Her firmware refuses anyone on the fleet's network, caps tilt, yaw and thrust again, and her thrust lock and failsafes still hold.
-- **Flying from her Android app:** `Android App/`, the same sticks and rules. Choose WIFI or BLUETOOTH in the app. Build it with `gradlew assembleDebug`; the APKs are kept in `Android App/apk/`.
-- **Bluetooth:** press PAIR in her first two minutes after power-up and she pairs like a remote, then that phone reconnects any time. Flying needs the encrypted link, so strangers can't. It shares the radio with her WiFi.
-- **A gamepad or flight stick:** over Bluetooth, or plugged in with a USB-C adapter (the phone must support USB OTG). Gamepad: pair it with the phone. Right trigger is the throttle (let go and she powers down), left stick turns, right stick tilts, hold A to arm, B stops. If it disconnects, she disarms. Flight stick: the stick tilts, its twist turns, the lever is the throttle; hold the trigger to arm, button 2 stops. A lever stays where it's left, so bring it down before you let go.
-- **The official apps:** [ESP-Drone Android](https://github.com/EspressifApps/ESP-Drone-Android) and [ESP-Drone iOS](https://github.com/EspressifApps/ESP-Drone-iOS) fly her over WiFi too. Their flight packets are the ones her own app sends. Their Bluetooth code is Crazyflie's and doesn't reach her.
-- **Safety:** the fleet can look at her and hear her, nothing in it can arm or fly her. It runs at the lowest priority, and with her motors spinning she won't scan, join a network or chirp, because a scan would cut the app flying her.
-- **Her WiFi channel is 1**, the fleet's (CF-Drone's own WiFi uses channel 1 too).
+- Hardware: Diymore ESP32 Drone DIY Kit E1, on order: the CHERGLOW (琛光) E1 Mini, MPU6500 gyro over SPI. Sold as an ESP32-S3 with 716 motors, but her manual and the open design say a plain 30-pin ESP32 with 8520 motors, so the chip gets confirmed when she arrives. 3.7 V single-cell LiPo, not included.
+- Based on: [CF-Drone](https://github.com/songge8/CF-Drone) e7f507f (CHERGLOW / songge8, built on [Flix](https://github.com/okalachev/flix) and ESP-Drone), her kit's own flight firmware. Her S3 pins come from [RayCyder/CF-Drone](https://github.com/RayCyder/CF-Drone), her hardware design is at [oshwhub](https://oshwhub.com/songge8/project_qqqyfdkm).
+- Firmware: `scripts/aria_flight` (Arduino, English throughout), for a plain ESP32 or an S3.
+- Licence: GPL-3.0 with CF-Drone's additional terms (`scripts/aria_flight/LICENSE`). Personal and non-commercial use is exempt from those terms; selling her firmware or hardware isn't allowed without CHERGLOW's permission.
+- Colours: cyan and white, like clouds
+- Status: her firmware compiles for both chips and her link rules pass their tests on a PC. It has never run on her: she hasn't arrived, and nothing here is flight-tested.
 
 ---
 
@@ -130,6 +119,36 @@ On top of CF-Drone (`scripts/aria_flight/aria_fleet.cpp`, `aria_ble.cpp`, `link_
 
 <!-- keymap:end -->
 
+---
+
+## Her pages
+
+<div align="center">
+  <img src="images/screenshots/controller-page.png" alt="ARIA's controller page, on a pretend ARIA" width="320"/>
+  <img src="images/screenshots/fly-page.png" alt="Flying ARIA from a browser" width="520"/>
+</div>
+
+---
+
+## In the fleet
+
+On top of CF-Drone (`scripts/aria_flight/aria_fleet.cpp`, `aria_ble.cpp`, `link_aria.ino`):
+
+- **RIFT:** she keeps her own AP for the app and joins the highest fleet network she can see, then registers with whoever hosts the list. She only ever joins, she never hosts.
+- **`:5014`:** her controller page (`web/`, RIFT's Open button), `GET /status` (flying, battery, network, signal), `GET /ping`, `GET /chirp?u=<0-16>`.
+- **ESP-NOW:** the fleet's "I'm here" beacon twice a second, saying "park" or "go", and she hears everyone else's: `/near`.
+- **Little windows:** her app and page show battery, pitch, roll, signal and network, and each nearby robot with a rough distance. It's from radio strength, so walls and antennas change it: hence the ~.
+- **Brainfuck:** the fleet's phrases as flashes of her LED, on the ground only. The kit has no buzzer, and the S3 board has no spare LED, so there she stays quiet.
+- **Flying from a browser:** on her own WiFi, `http://192.168.43.42:5014/fly` has two sticks over a WebSocket (`/fly-ws`). Her firmware refuses anyone on the fleet's network, caps tilt, yaw and thrust again, and her thrust lock and failsafes still hold.
+- **Flying from her Android app:** `Android App/`, the same sticks and rules. Choose WIFI or BLUETOOTH in the app. Build it with `gradlew assembleDebug`; the APKs are kept in `Android App/apk/`, the newest is [`ARIA-debug-2026-10-30.apk`](Android%20App/apk/ARIA-debug-2026-10-30.apk).
+- **Bluetooth:** press PAIR in her first two minutes after power-up and she pairs like a remote, then that phone reconnects any time. Flying needs the encrypted link, so strangers can't. It shares the radio with her WiFi.
+- **A gamepad or flight stick:** over Bluetooth, or plugged in with a USB-C adapter (the phone must support USB OTG). Gamepad: pair it with the phone. Right trigger is the throttle (let go and she powers down), left stick turns, right stick tilts, hold A to arm, B stops. If it disconnects, she disarms. Flight stick: the stick tilts, its twist turns, the lever is the throttle; hold the trigger to arm, button 2 stops. A lever stays where it's left, so bring it down before you let go.
+- **The official apps:** [ESP-Drone Android](https://github.com/EspressifApps/ESP-Drone-Android) and [ESP-Drone iOS](https://github.com/EspressifApps/ESP-Drone-iOS) fly her over WiFi too. Their flight packets are the ones her own app sends. Their Bluetooth code is Crazyflie's and doesn't reach her.
+- **Safety:** the fleet can look at her and hear her, nothing in it can arm or fly her. It runs at the lowest priority, and with her motors spinning she won't scan, join a network or chirp, because a scan would cut the app flying her.
+- **Her WiFi channel is 1**, the fleet's (CF-Drone's own WiFi uses channel 1 too).
+
+---
+
 ## Flying rules
 
 The same whichever way she's flown (app, browser, Bluetooth, ESP-Drone's own apps):
@@ -158,13 +177,17 @@ Her logic tests: `g++ -std=c++17 -mno-ms-bitfields -Iscripts/aria_flight -Iscrip
 `python scripts/fake_aria.py` is a pretend ARIA on this PC, for trying the page and RIFT's link with no drone.
 
 She climbs the ladder too: every minute she looks for a higher fleet network, but only on the ground with nobody on her own WiFi, so a scan can't cut the phone flying her. On the fleet's network she's also `http://aria.local:5014`.
-- Site: https://cursedprograms.github.io/ARIA-Robot-v00/
 
-<div align="center">
-  <img src="images/aria_avatar.jpg" alt="ARIA avatar: a human representation of the drone" width="320"/>
-</div>
+---
 
-ARIA is the flying member of the DREAM Robotics fleet. The plan is the same as the rest of the fleet: she joins RIFT's network, answers `/status`, and talks to the others. CF-Drone gives her stabilised flight, a web remote and a debug console, and QGroundControl, ELRS or SBUS can fly her too. Her spare headers take a barometer, laser rangefinder, compass and optical flow sensor.
+## Bluetooth
+
+The fleet has **one Bluetooth protocol** (`fleet_bt`, master copy in [RIFT](https://github.com/CursedPrograms/RIFT)'s `Fleet/`): a controller sends exactly the web request it would send over WiFi, one per line (`>GET /status`, `>POST /command<TAB>{...}`), and the robot asks his or her own web server and answers `<code> <length>` and the body. So every command works the same both ways, including new ones, and so does every rule: the PIN, the locks, the robot's own stops.
+
+- **ARIA** carries it over **Bluetooth LE** (`scripts/aria_flight/fleet_bt_ble.h`, the standard Nordic UART service), since her ESP32-C3 / S3 boards have no Classic Bluetooth. Python: `fleet_bt.BtSession("ble:ARIA")`.
+- **Only** `/status`, `/near`, `/ping` and `/chirp` answer over it: **flying stays on her paired app** (her own encrypted FLY characteristic and its pairing window), and `/chirp` still refuses while she's armed.
+
+<!-- DREAM-ECOSYSTEM:START -->
 
 ---
 
@@ -178,14 +201,6 @@ ARIA is the flying member of the DREAM Robotics fleet. The plan is the same as t
 
 ---
 
-## Bluetooth
-
-The fleet has **one Bluetooth protocol** (`fleet_bt`, master copy in [RIFT](https://github.com/CursedPrograms/RIFT)'s `Fleet/`): a controller sends exactly the web request it would send over WiFi, one per line (`>GET /status`, `>POST /command<TAB>{...}`), and the robot asks its own web server and answers `<code> <length>` and the body. So every command works the same both ways, including new ones, and so does every rule: the PIN, the locks, the robot's own stops.
-
-- **ARIA** carries it over **Bluetooth LE** (`scripts/aria_flight/fleet_bt_ble.h`, the standard Nordic UART service), since her ESP32-C3 / S3 boards have no Classic Bluetooth. Python: `fleet_bt.BtSession("ble:ARIA")`.
-- **Only** `/status`, `/near`, `/ping` and `/chirp` answer over it: **flying stays on her paired app** (her own encrypted FLY characteristic and its pairing window), and `/chirp` still refuses while she's armed.
-
-<!-- DREAM-ECOSYSTEM:START -->
 ## The DREAM Robotics ecosystem
 
 **Minds** — [DREAM](https://github.com/CursedPrograms/DREAM) companion · [TINA](https://github.com/CursedPrograms/TINA) engineer · [NINA](https://github.com/CursedPrograms/NINA) caretaker · [RIFT](https://github.com/CursedPrograms/RIFT) fleet hub · [LYCEA](https://github.com/CursedPrograms/LYCEA) training school  

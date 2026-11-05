@@ -22,6 +22,13 @@
     <a class="brand" href="#top">ARIA</a>
     <ul>
       <li><a href="#overview">Overview</a></li>
+      <li><a href="#hardware">Hardware</a></li>
+      <li><a href="#fleet">Fleet</a></li>
+      <li><a href="#rules">Flying rules</a></li>
+      <li><a href="#quickstart">When she arrives</a></li>
+      <li><a href="#controls">Controls</a></li>
+      <li><a href="#bluetooth">Bluetooth</a></li>
+      <li><a href="#screens">Screens</a></li>
       <li><a href="https://github.com/CursedPrograms/ARIA-Robot-v00">GitHub</a></li>
     </ul>
   </div>
@@ -32,21 +39,144 @@
     <div class="eyebrow">A DREAM Robotics Agent &middot; Drone</div>
     <h1>ARIA</h1>
     <p class="tagline">Aerial Roaming Intelligent Automaton</p>
-    <p class="lede">The flying member of the DREAM Robotics fleet.</p>
+    <p class="lede">The flying member of the DREAM Robotics fleet. She joins RIFT's network, answers <code>/status</code> and talks to the others, on top of CF-Drone's stabilised flight.</p>
     <div class="cta">
       <a class="btn primary" href="https://github.com/CursedPrograms/ARIA-Robot-v00">View on GitHub</a>
+      <a class="btn" href="#quickstart">When she arrives</a>
+      <a class="btn" href="https://ko-fi.com/cursedentertainment">Support on Ko-fi</a>
     </div>
+    <div class="tags" aria-label="Technologies">
+      <span class="tag">C++</span>
+      <span class="tag">Arduino</span>
+      <span class="tag">ESP32 / ESP32-S3</span>
+      <span class="tag">CF-Drone</span>
+      <span class="tag">GPL-3.0</span>
+    </div>
+
     <figure class="avatar">
-      <img src="images/aria_avatar.jpg" alt="ARIA's avatar: a human representation of the drone, white-haired, in flight gear, with a helicopter behind her">
+      <img src="images/aria_avatar.jpg" alt="ARIA's avatar: a human representation of the drone, white-haired, in flight gear, with a helicopter behind her" width="768" height="768">
       <figcaption>ARIA &middot; avatar</figcaption>
     </figure>
   </div>
 </header>
 
+<main>
+
 <section id="overview">
   <div class="wrap">
     <h2>Overview</h2>
-    <p>ARIA is based on <a href="https://github.com/songge8/CF-Drone">CF-Drone</a>, the open flight firmware for her kit, with the fleet&rsquo;s features added on top.</p>
+    <h3 class="title">A drone that joins the fleet</h3>
+    <p>ARIA is based on <a href="https://github.com/songge8/CF-Drone">CF-Drone</a>, the open flight firmware for her kit, with the fleet&rsquo;s features added on top. CF-Drone gives her stabilised flight, a web remote and a debug console, and QGroundControl, ELRS or SBUS can fly her too. Her spare headers take a barometer, laser rangefinder, compass and optical flow sensor.</p>
+    <p class="note">She hasn't arrived yet. Her firmware compiles for both chips and her link rules pass their tests on a PC, but it has never run on her and nothing here is flight-tested.</p>
+    <div class="grid cols-3">
+      <div class="card"><span class="k">Fleet</span><h4>She joins, never hosts</h4><p>She keeps her own WiFi for the app and joins the highest fleet network she can see, then registers with whoever hosts the list.</p></div>
+      <div class="card"><span class="k">Fly</span><h4>Phone, browser, pad</h4><p>Her Android app, a page with two sticks, a gamepad or a flight stick: the same caps and failsafes whichever way.</p><p><a class="btn primary" href="https://github.com/CursedPrograms/ARIA-Robot-v00/raw/main/Android%20App/apk/ARIA-debug-2026-10-30.apk">Download the APK</a></p></div>
+      <div class="card"><span class="k">Safe</span><h4>The fleet can't fly her</h4><p>The fleet can look at her and hear her; nothing in it can arm her. With her motors spinning she won't scan, join a network or chirp.</p></div>
+      <div class="card"><span class="k">Talk</span><h4>Brainfuck in light</h4><p>The fleet's phrases as flashes of her LED, on the ground only. The kit has no buzzer.</p></div>
+      <div class="card"><span class="k">Near</span><h4>Who's around</h4><p>The fleet's ESP-NOW "I'm here" beacon twice a second, and she hears everyone else's: <code>/near</code>.</p></div>
+      <div class="card"><span class="k">Colours</span><h4>Cyan and white</h4><p>Like clouds.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="hardware">
+  <div class="wrap">
+    <h2>Hardware</h2>
+    <h3 class="title">The kit</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Part</th><th>Details</th></tr>
+        <tr><td>Kit</td><td>Diymore ESP32 Drone DIY Kit E1; on order: the CHERGLOW E1 Mini</td></tr>
+        <tr><td>Chip</td><td>Sold as an ESP32-S3 with 716 motors, but her manual and the open design say a plain 30-pin ESP32 with 8520 motors, so the chip gets confirmed when she arrives</td></tr>
+        <tr><td>Gyro</td><td>MPU6500 over SPI</td></tr>
+        <tr><td>Battery</td><td>3.7 V single-cell LiPo, not included</td></tr>
+        <tr><td>Firmware</td><td><code>scripts/aria_flight</code> (Arduino), for a plain ESP32 or an S3</td></tr>
+        <tr><td>Licence</td><td>GPL-3.0 with CF-Drone's additional terms. Personal and non-commercial use is exempt; selling her firmware or hardware needs CHERGLOW's permission</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="fleet">
+  <div class="wrap">
+    <h2>In the fleet</h2>
+    <h3 class="title">On top of CF-Drone</h3>
+    <div class="grid cols-3">
+      <div class="card"><span class="k">:5014</span><h4>Her page and API</h4><p>Her controller page (RIFT's Open button), <code>GET /status</code> (flying, battery, network, signal), <code>/ping</code> and <code>/chirp?u=&lt;0-16&gt;</code>. On the fleet's network she's also <code>http://aria.local:5014</code>.</p></div>
+      <div class="card"><span class="k">Ladder</span><h4>She climbs too</h4><p>Every minute she looks for a higher fleet network, but only on the ground with nobody on her own WiFi, so a scan can't cut the phone flying her.</p></div>
+      <div class="card"><span class="k">Browser</span><h4>Flying from a page</h4><p>On her own WiFi, <code>http://192.168.43.42:5014/fly</code> has two sticks over a WebSocket. She refuses anyone on the fleet's network.</p></div>
+      <div class="card"><span class="k">Android</span><h4>Her app</h4><p>The same sticks and rules, over WIFI or BLUETOOTH. A gamepad or flight stick pairs with the phone, or plugs in over USB-C.</p></div>
+      <div class="card"><span class="k">Little windows</span><h4>What she shows</h4><p>Her app and page show battery, pitch, roll, signal and network, and each nearby robot with a rough distance (~, from radio strength).</p></div>
+      <div class="card"><span class="k">Apps</span><h4>ESP-Drone's own apps</h4><p><a href="https://github.com/EspressifApps/ESP-Drone-Android">Android</a> and <a href="https://github.com/EspressifApps/ESP-Drone-iOS">iOS</a> fly her over WiFi too. Her WiFi channel is 1, the fleet's.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="rules">
+  <div class="wrap">
+    <h2>Flying rules</h2>
+    <h3 class="title">The same whichever way she's flown</h3>
+    <ul>
+      <li>She won't arm until she has seen thrust 0, and only from a low thrust. Holding 0 for 0.3 s disarms her.</li>
+      <li>If the commands stop, she levels at 0.5 s and starts CF-Drone's controlled descent at 1 s.</li>
+      <li>Tilt, yaw and thrust are capped in the firmware, whatever the app sends.</li>
+      <li>CF-Drone's own protection stays on: no arming on a low battery or a failed gyro, landing on a critical battery, cutting out when upside down.</li>
+      <li>Her stock remote page and debug console are still there, at <code>http://192.168.43.42</code> on her own WiFi <code>ARIA</code>.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="quickstart">
+  <div class="wrap">
+    <h2>When she arrives</h2>
+    <h3 class="title">With the propellers off</h3>
+    <ol>
+      <li><code>scripts\flash.ps1 -Backup</code> saves her factory firmware.</li>
+      <li><code>scripts\flash.ps1 -Sketch aria_pin_finder</code>, then WiFi <code>ARIA_PINS</code> and <code>http://192.168.4.1</code>: it shows her chip, finds the gyro and battery, and pulses one pin at a time at 15% so you can see which motor is which.</li>
+      <li>If the pins differ from <code>board_config.h</code>, change them there, or use <code>p MOT_PIN_FL &lt;pin&gt;</code> on the console.</li>
+      <li><code>scripts\flash.ps1</code> flashes her flight firmware, for whichever chip she has.</li>
+      <li>On the debug console: <code>ca</code> for the six-side calibration, <code>ps</code> to check it, then <code>mfl</code>, <code>mfr</code>, <code>mrl</code>, <code>mrr</code> for each motor.</li>
+      <li>Pair her app, arm with no propellers, and check each stick moves the right motors the right way before the first flight.</li>
+    </ol>
+    <p class="muted"><code>python scripts/fake_aria.py</code> is a pretend ARIA on the PC, for trying the page and RIFT's link with no drone.</p>
+  </div>
+</section>
+
+<section id="controls">
+  <div class="wrap">
+    <h2>Controls</h2>
+    <h3 class="title">Keyboard, gamepad, flight stick</h3>
+    <div class="grid cols-3">
+      <div class="card"><span class="k">Keyboard</span><h4>Her fly page</h4><p><kbd>Enter</kbd> held 1 s arms her (throttle down). <kbd>W</kbd> held is the throttle: let go and she powers down. <kbd>A</kbd> <kbd>D</kbd> turn, the arrows tilt, <kbd>Space</kbd> stops. Leaving the window disarms her.</p></div>
+      <div class="card"><span class="k">Gamepad</span><h4>Phone app</h4><p>Right trigger is the throttle, left stick turns, right stick tilts, hold A to arm, B stops. If it disconnects, she disarms.</p></div>
+      <div class="card"><span class="k">Flight stick</span><h4>Phone app</h4><p>The stick tilts, its twist turns, the lever is the throttle; hold the trigger to arm, button 2 stops. A lever stays where it's left, so bring it down before you let go.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="bluetooth">
+  <div class="wrap">
+    <h2>Bluetooth</h2>
+    <h3 class="title">The fleet's one protocol, over BLE</h3>
+    <p>A controller sends exactly the web request it would send over WiFi, one per line, and she asks her own web server and answers. Her boards have no Classic Bluetooth, so she carries it over Bluetooth LE (the Nordic UART service): <code>fleet_bt.BtSession("ble:ARIA")</code>.</p>
+    <p>Only <code>/status</code>, <code>/near</code>, <code>/ping</code> and <code>/chirp</code> answer over it. Flying stays on her paired app (press PAIR in her first two minutes after power-up), and <code>/chirp</code> still refuses while she's armed.</p>
+  </div>
+</section>
+
+<section id="screens">
+  <div class="wrap">
+    <h2>Screens</h2>
+    <h3 class="title">Her pages</h3>
+    <div class="screens">
+      <figure class="shot narrow">
+        <img src="images/screenshots/controller-page.png" alt="ARIA's controller page, on a pretend ARIA" width="640" height="1100" loading="lazy">
+        <figcaption>Controller page</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="images/screenshots/fly-page.png" alt="Flying ARIA from a browser: two sticks" width="900" height="420" loading="lazy">
+        <figcaption>Fly page</figcaption>
+      </figure>
+    </div>
   </div>
 </section>
 
@@ -55,10 +185,11 @@
     <h2>Windows app</h2>
     <h3 class="title">A native window on ARIA's page</h3>
     <p>It opens ARIA's own hosted page in a window, so it always looks the same as the page. It remembers the address, and FIND looks on the fleet list of the network you're on. If ARIA doesn't answer, it says so and lets you change the address.</p>
-    <p>She also joins the fleet's network, where she's <code>http://aria.local:5014</code>, and only looks for a higher network on the ground with nobody on her own WiFi.</p>
     <p><a class="btn primary" href="https://github.com/CursedPrograms/ARIA-Robot-v00/raw/main/builds/ARIA-Controller.exe">Download ARIA-Controller.exe</a></p>
   </div>
 </section>
+
+</main>
 
 <footer id="site-footer">&copy; Cursed Entertainment 2026</footer>
 <script src="https://cursedprograms.github.io/RIFT/site/footer.js"></script>
