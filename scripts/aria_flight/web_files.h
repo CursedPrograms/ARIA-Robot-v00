@@ -23,6 +23,19 @@ static const char WEB_APP_JS[] = R"WEBFILE(// ARIA's controller page: reads /sta
     box.appendChild(b);
   });
 
+  // Her two talk switches (/talkmute; RIFT has the same): her LED when she chats, and the chatting itself
+  var talkBtn = document.getElementById("talk"), chatBtn = document.getElementById("chat");
+  function showTalk(s) {
+    talkBtn.textContent = s.talk_muted ? "LED talk: off" : "LED talk: on";
+    chatBtn.textContent = s.chat_off ? "Chat: off" : "Chat: on";
+  }
+  function flip(which) {
+    fetch("/talkmute?" + which + "=toggle").then(function (r) { return r.json(); })
+      .then(showTalk).catch(function () {});
+  }
+  talkBtn.addEventListener("click", function () { flip("on"); });
+  chatBtn.addEventListener("click", function () { flip("chat_off"); });
+
   function set(id, text) {
     document.getElementById(id).textContent = text;
   }
@@ -39,7 +52,8 @@ static const char WEB_APP_JS[] = R"WEBFILE(// ARIA's controller page: reads /sta
       set("rssi", s.rssi ? s.rssi + " dBm" : "--");
       set("pitch", s.pitch.toFixed(1) + "\u00b0");
       set("roll", s.roll.toFixed(1) + "\u00b0");
-      box.querySelectorAll("button").forEach(function (b) { b.disabled = s.flying; });
+      box.querySelectorAll("button").forEach(function (b) { b.disabled = s.flying || !!s.chat_off; });
+      showTalk(s);
     }).catch(function () {
       link.textContent = "no answer";
       link.className = "pill";
@@ -354,6 +368,7 @@ static const char WEB_INDEX_HTML[] = R"WEBFILE(<!DOCTYPE html>
     <h2>Say something</h2>
     <p class="hint">In Brainfuck, on the ground only.</p>
     <div class="buttons" id="phrases"></div>
+    <div class="buttons"><button id="talk" title="Her LED blinking the Brainfuck when she chats (off: she chats quietly; RIFT has the same switch)">LED talk: --</button><button id="chat" title="Her Brainfuck with the fleet at all (RIFT has the same switch)">Chat: --</button></div>
     <div id="note" class="hint"></div>
   </section>
 

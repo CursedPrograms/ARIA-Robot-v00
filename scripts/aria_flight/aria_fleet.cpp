@@ -15,6 +15,7 @@
  */
 #include <Arduino.h>
 #include <ESPmDNS.h>
+#include <Preferences.h>
 #include <WiFi.h>
 
 #include <stdio.h>
@@ -54,6 +55,8 @@ static_assert(sizeof(AriaBeacon) == 91, "the fleet's beacon is 91 bytes");
 static const uint8_t BROADCAST[ESP_NOW_ETH_ALEN] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 static esp_netif_t *staNetif;
 static QueueHandle_t chirpQueue;
+static bool talkMuted = false;   // her sound switch: she chats, but her LED doesn't blink it (/talkmute?on=)
+static bool chatOff = false;     // her chat switch: no Brainfuck with the fleet at all (/talkmute?chat_off=)
 static char joined[ARIA_NAME_MAX] = "";
 static bool online = false;
 
@@ -257,16 +260,17 @@ static esp_err_t sendJson(httpd_req_t *req, const char *json)
 
 static esp_err_t statusGet(httpd_req_t *req)
 {
-    char json[280];
+    char json[320];
     const Quaternion now = attitude;
     wifi_ap_record_t ap = {};
     const int rssi = online && esp_wifi_sta_get_ap_info(&ap) == ESP_OK ? ap.rssi : 0;
     const char *flying = armed ? "true" : "false";
     snprintf(json, sizeof(json),
              "{\"name\":\"ARIA\",\"type\":\"drone\",\"mode\":\"%s\",\"moving\":%s,\"flying\":%s,"
-             "\"battery_v\":%.2f,\"pitch\":%.1f,\"roll\":%.1f,\"network\":\"%s\",\"rssi\":%d}",
+             "\"battery_v\":%.2f,\"pitch\":%.1f,\"roll\":%.1f,\"network\":\"%s\",\"rssi\":%d,\"talk_muted\":%s,\"chat_off\":%s}",
              armed ? "flying" : "ground", flying, flying, (double)batteryVoltage,
-             (double)degrees(now.getPitch()), (double)degrees(now.getRoll()), joined, rssi);
+             (double)degrees(now.getPitch()), (double)degrees(now.getRoll()), joined, rssi, talkMuted ? "true" : "false",
+             chatOff ? "true" : "false");
     return sendJson(req, json);
 }
 
@@ -294,12 +298,53 @@ static esp_err_t chirpGet(httpd_req_t *req)
         httpd_resp_set_status(req, "400 Bad Request");
         return sendJson(req, "{\"ok\":false,\"error\":\"use /chirp?u=0-16\"}");
     }
+    if (chatOff) {
+        httpd_resp_set_status(req, "409 Conflict");
+        return sendJson(req, "{\"ok\":false,\"reason\":\"chat_off\"}");
+    }
     if (armed) {
         httpd_resp_set_status(req, "409 Conflict");
         return sendJson(req, "{\"ok\":false,\"error\":\"she's flying\"}");
     }
+    if (talkMuted) return sendJson(req, "{\"ok\":true,\"silent\":true}");   // said, without the LED
     xQueueSend(chirpQueue, &u, 0);
     return sendJson(req, "{\"ok\":true}");
+}
+
+// Her two talk switches, kept in NVS (no PIN: they only quiet her). 1|0|toggle each:
+//   ?on=        sound: she chats, but her LED doesn't blink it
+//   ?chat_off=  chat: no Brainfuck with the fleet at all
+static bool talkFlag(const char *v, bool now)
+{
+    if (v[0] == 't' && v[1] == 'o') return !now;   // toggle
+    return v[0] == '1' || v[0] == 't';             // 1, true
+}
+
+static esp_err_t talkMuteGet(httpd_req_t *req)
+{
+    char query[40] = "", value[8] = "";
+    bool changed = false;
+    if (httpd_req_get_url_query_str(req, query, sizeof(query)) == ESP_OK) {
+        if (httpd_query_key_value(query, "on", value, sizeof(value)) == ESP_OK) {
+            talkMuted = talkFlag(value, talkMuted);
+            changed = true;
+        }
+        if (httpd_query_key_value(query, "chat_off", value, sizeof(value)) == ESP_OK) {
+            chatOff = talkFlag(value, chatOff);
+            changed = true;
+        }
+    }
+    if (changed) {
+        Preferences p;
+        p.begin("talk", false);
+        p.putBool("muted", talkMuted);
+        p.putBool("chatoff", chatOff);
+        p.end();
+    }
+    char json[48];
+    snprintf(json, sizeof(json), "{\"talk_muted\":%s,\"chat_off\":%s}", talkMuted ? "true" : "false",
+             chatOff ? "true" : "false");
+    return sendJson(req, json);
 }
 
 static void route(httpd_handle_t server, const char *uri, esp_err_t (*handler)(httpd_req_t *), bool socket = false)
@@ -316,6 +361,13 @@ void ariaFleetStart()
 {
     staNetif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
     chirpQueue = xQueueCreate(2, sizeof(int));
+    {
+        Preferences p;
+        p.begin("talk", true);
+        talkMuted = p.getBool("muted", false);
+        chatOff = p.getBool("chatoff", false);
+        p.end();
+    }
     MDNS.begin("aria");           // http://aria.local:5014 on the fleet's network
     MDNS.addService("http", "tcp", ARIA_PORT);
 
@@ -339,6 +391,7 @@ void ariaFleetStart()
         route(server, "/near", nearGet);
         route(server, "/ping", pingGet);
         route(server, "/chirp", chirpGet);
+        route(server, "/talkmute", talkMuteGet);   // the 12th: max_uri_handlers
     }
 #if ARIA_BLE
     ariaBleStart();

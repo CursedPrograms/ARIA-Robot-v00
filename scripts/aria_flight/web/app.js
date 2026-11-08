@@ -20,6 +20,19 @@
     box.appendChild(b);
   });
 
+  // Her two talk switches (/talkmute; RIFT has the same): her LED when she chats, and the chatting itself
+  var talkBtn = document.getElementById("talk"), chatBtn = document.getElementById("chat");
+  function showTalk(s) {
+    talkBtn.textContent = s.talk_muted ? "LED talk: off" : "LED talk: on";
+    chatBtn.textContent = s.chat_off ? "Chat: off" : "Chat: on";
+  }
+  function flip(which) {
+    fetch("/talkmute?" + which + "=toggle").then(function (r) { return r.json(); })
+      .then(showTalk).catch(function () {});
+  }
+  talkBtn.addEventListener("click", function () { flip("on"); });
+  chatBtn.addEventListener("click", function () { flip("chat_off"); });
+
   function set(id, text) {
     document.getElementById(id).textContent = text;
   }
@@ -36,7 +49,8 @@
       set("rssi", s.rssi ? s.rssi + " dBm" : "--");
       set("pitch", s.pitch.toFixed(1) + "\u00b0");
       set("roll", s.roll.toFixed(1) + "\u00b0");
-      box.querySelectorAll("button").forEach(function (b) { b.disabled = s.flying; });
+      box.querySelectorAll("button").forEach(function (b) { b.disabled = s.flying || !!s.chat_off; });
+      showTalk(s);
     }).catch(function () {
       link.textContent = "no answer";
       link.className = "pill";
